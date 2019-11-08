@@ -19,6 +19,6 @@ querystring = {"param":"value"}
 
 response = requests.request("GET", url, params=querystring)
 
-print(response.text)`)
+print(response.json())`)
   })
 }

@@ -117,7 +117,7 @@ module.exports = function (source, options) {
       .push('let session = URLSession.shared')
       .push('let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in')
       .push(1, 'if (error != nil) {')
-      .push(2, 'print(error)')
+      .push(2, 'print(error as Any)')
       .push(1, '} else {')
       // Casting the NSURLResponse to NSHTTPURLResponse so the user can see the status     .
       .push(2, 'let httpResponse = response as? HTTPURLResponse')

@@ -112,7 +112,7 @@ module.exports = function (source, options) {
       .blank()
 
       // Print response
-      .push('print(response.text)')
+      .push('print(response.json())')
 
   return code.join()
 }

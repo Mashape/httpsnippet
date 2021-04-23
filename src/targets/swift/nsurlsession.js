@@ -42,13 +42,17 @@ module.exports = function (source, options) {
 
     switch (source.postData.mimeType) {
       case 'application/x-www-form-urlencoded':
-        // By appending parameters one by one in the resulting snippet,
-        // we make it easier for the user to edit it according to his or her needs after pasting.
-        // The user can just add/remove lines adding/removing body parameters.
-        code.blank()
-            .push('let postData = NSMutableData(data: "%s=%s".data(using: String.Encoding.utf8)!)', source.postData.params[0].name, source.postData.params[0].value)
-        for (var i = 1, len = source.postData.params.length; i < len; i++) {
-          code.push('postData.append("&%s=%s".data(using: String.Encoding.utf8)!)', source.postData.params[i].name, source.postData.params[i].value)
+        if (source.postData.params.length) {
+          // By appending parameters one by one in the resulting snippet,
+          // we make it easier for the user to edit it according to his or her needs after pasting.
+          // The user can just add/remove lines adding/removing body parameters.
+          code.blank()
+              .push('let postData = NSMutableData(data: "%s=%s".data(using: String.Encoding.utf8)!)', source.postData.params[0].name, source.postData.params[0].value)
+          for (var i = 1, len = source.postData.params.length; i < len; i++) {
+            code.push('postData.append("&%s=%s".data(using: String.Encoding.utf8)!)', source.postData.params[i].name, source.postData.params[i].value)
+          }
+        } else {
+          req.hasBody = false
         }
         break
 
@@ -57,6 +61,8 @@ module.exports = function (source, options) {
           code.push(helpers.literalDeclaration('parameters', source.postData.jsonObj, opts), 'as [String : Any]')
               .blank()
               .push('let postData = JSONSerialization.data(withJSONObject: parameters, options: [])')
+        } else {
+          req.hasBody = false
         }
         break
 

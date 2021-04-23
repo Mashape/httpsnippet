@@ -41,15 +41,19 @@ module.exports = function (source, options) {
 
     switch (source.postData.mimeType) {
       case 'application/x-www-form-urlencoded':
-        // By appending parameters one by one in the resulting snippet,
-        // we make it easier for the user to edit it according to his or her needs after pasting.
-        // The user can just add/remove lines adding/removing body parameters.
-        code.blank()
-            .push('NSMutableData *postData = [[NSMutableData alloc] initWithData:[@"%s=%s" dataUsingEncoding:NSUTF8StringEncoding]];',
-          source.postData.params[0].name, source.postData.params[0].value)
-        for (var i = 1, len = source.postData.params.length; i < len; i++) {
-          code.push('[postData appendData:[@"&%s=%s" dataUsingEncoding:NSUTF8StringEncoding]];',
-            source.postData.params[i].name, source.postData.params[i].value)
+        if (source.postData.params.length) {
+          // By appending parameters one by one in the resulting snippet,
+          // we make it easier for the user to edit it according to his or her needs after pasting.
+          // The user can just add/remove lines adding/removing body parameters.
+          code.blank()
+              .push('NSMutableData *postData = [[NSMutableData alloc] initWithData:[@"%s=%s" dataUsingEncoding:NSUTF8StringEncoding]];',
+            source.postData.params[0].name, source.postData.params[0].value)
+          for (var i = 1, len = source.postData.params.length; i < len; i++) {
+            code.push('[postData appendData:[@"&%s=%s" dataUsingEncoding:NSUTF8StringEncoding]];',
+              source.postData.params[i].name, source.postData.params[i].value)
+          }
+        } else {
+          req.hasBody = false
         }
         break
 
@@ -58,6 +62,8 @@ module.exports = function (source, options) {
           code.push(helpers.nsDeclaration('NSDictionary', 'parameters', source.postData.jsonObj, opts.pretty))
               .blank()
               .push('NSData *postData = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];')
+        } else {
+          req.hasBody = false
         }
         break
 

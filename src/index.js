@@ -15,7 +15,7 @@ var validate = require('har-validator/lib/async')
 const { formDataIterator, isBlob } = require('./helpers/form-data.js')
 
 // constructor
-var HTTPSnippet = function (data) {
+var HTTPSnippet = function (data, encodeUri = true) {
   var entries
   var self = this
   var input = Object.assign({}, data)
@@ -50,12 +50,12 @@ var HTTPSnippet = function (data) {
         throw err
       }
 
-      self.requests.push(self.prepare(entry.request))
+      self.requests.push(self.prepare(entry.request, encodeUri))
     })
   })
 }
 
-HTTPSnippet.prototype.prepare = function (request) {
+HTTPSnippet.prototype.prepare = function (request, encodeUri = true) {
   // construct utility properties
   request.queryObj = {}
   request.headersObj = {}
@@ -235,6 +235,15 @@ HTTPSnippet.prototype.prepare = function (request) {
 
   // construct a full url
   request.fullUrl = url.format(request.uriObj)
+
+
+  if (!encodeUri) {
+    request.fullUrl = decodeURI(request.fullUrl)
+    request.url = decodeURI(request.url)
+    request.uriObj.path = decodeURI(request.uriObj.path)
+    request.uriObj.pathname = decodeURI(request.uriObj.pathname)
+    request.uriObj.href = decodeURI(request.uriObj.href)
+  }
 
   return request
 }

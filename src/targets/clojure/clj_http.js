@@ -31,7 +31,9 @@ File.prototype.toString = function () {
 
 var jsType = function (x) {
   return (typeof x !== 'undefined')
-          ? x.constructor.name.toLowerCase()
+          ? ((x !== null)
+              ? x.constructor.name.toLowerCase()
+            : 'null')
           : null
 }
 

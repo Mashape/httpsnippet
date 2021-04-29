@@ -68,8 +68,8 @@ module.exports = function (source, options) {
       if (source.postData.params) {
         source.postData.params.forEach(function (param) {
           code.push(
-            '%s %s', opts.binary ? '--data-binary' : (opts.short ? '-d' : '--data'),
-            helpers.quote(util.format('%s=%s', param.name, param.value))
+            '%s %s', opts.binary ? '--data-binary' : '--data-urlencode',
+            helpers.quote(util.format('%s=%s', encodeURIComponent(param.name), param.value))
           )
         })
       } else {

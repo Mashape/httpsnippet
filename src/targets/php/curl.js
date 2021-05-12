@@ -11,6 +11,7 @@
 'use strict'
 
 const util = require('util')
+const helpers = require('./helpers')
 const CodeBuilder = require('../../helpers/code-builder')
 
 module.exports = function (source, options) {
@@ -28,6 +29,14 @@ module.exports = function (source, options) {
 
   if (!opts.noTags) {
     code.push(opts.shortTags ? '<?' : '<?php')
+      .blank()
+  }
+
+  if (source.postData.mimeType === 'application/x-www-form-urlencoded') {
+    code.push('$postData = http_build_query(' + helpers.convert(source.postData.paramsObj, opts.indent) + ');')
+      .blank()
+  } else if (source.postData.text) {
+    code.push('$postData = ' + JSON.stringify(source.postData.text) + ';')
       .blank()
   }
 
@@ -67,9 +76,9 @@ module.exports = function (source, options) {
     name: 'CURLOPT_CUSTOMREQUEST',
     value: source.method
   }, {
-    escape: true,
+    escape: false,
     name: 'CURLOPT_POSTFIELDS',
-    value: source.postData ? source.postData.text : undefined
+    value: source.postData.text || (source.postData.mimeType === 'application/x-www-form-urlencoded' && source.postData.paramsObj) ? '$postData' : undefined
   }]
 
   code.push('curl_setopt_array($curl, [')

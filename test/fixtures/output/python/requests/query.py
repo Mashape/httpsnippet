@@ -2,8 +2,12 @@ import requests
 
 url = "http://mockbin.com/har"
 
-querystring = {"foo":["bar","baz"],"baz":"abc","key":"value"}
+querystring = {
+    "foo": ["bar", "baz"],
+    "baz": "abc",
+    "key": "value"
+}
 
-response = requests.request("GET", url, params=querystring)
+response = requests.get(url, params=querystring)
 
 print(response.text)

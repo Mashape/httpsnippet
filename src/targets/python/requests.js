@@ -14,6 +14,16 @@ const util = require('util')
 const CodeBuilder = require('../../helpers/code-builder')
 const helpers = require('./helpers')
 
+const builtInMethods = [
+  'HEAD',
+  'GET',
+  'POST',
+  'PUT',
+  'PATCH',
+  'DELETE',
+  'OPTIONS'
+]
+
 module.exports = function (source, options) {
   const opts = Object.assign({
     indent: '    ',
@@ -34,7 +44,7 @@ module.exports = function (source, options) {
   // Construct query string
   let qs
   if (Object.keys(source.queryObj).length) {
-    qs = 'querystring = ' + JSON.stringify(source.queryObj)
+    qs = 'querystring = ' + helpers.literalRepresentation(source.queryObj, opts)
 
     code.push(qs)
       .blank()
@@ -52,6 +62,14 @@ module.exports = function (source, options) {
       }
       break
 
+    case 'application/x-www-form-urlencoded':
+      if (source.postData.paramsObj) {
+        code.push('payload = %s', helpers.literalRepresentation(source.postData.paramsObj, opts))
+        hasPayload = true
+        break
+      }
+      // Otherwise, fall through to treat as plain text:
+
     default: {
       const payload = JSON.stringify(source.postData.text)
       if (payload) {
@@ -67,7 +85,7 @@ module.exports = function (source, options) {
 
   if (headerCount === 1) {
     for (const header in headers) {
-      code.push('headers = {"%s": "%s"}', header, headers[header])
+      code.push('headers = { "%s": "%s" }', header, headers[header])
         .blank()
     }
   } else if (headerCount > 1) {
@@ -89,7 +107,10 @@ module.exports = function (source, options) {
 
   // Construct request
   const method = source.method
-  let request = util.format('response = requests.request("%s", url', method)
+
+  let request = builtInMethods.includes(method)
+    ? util.format('response = requests.%s(url', method.toLowerCase())
+    : util.format('response = requests.request("%s", url', method)
 
   if (hasPayload) {
     if (jsonPayload) {
